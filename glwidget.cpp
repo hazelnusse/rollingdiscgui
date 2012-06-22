@@ -182,8 +182,6 @@ void GLWidget::initializeGL()
     glLineWidth(1.5);
 
     glShadeModel(GL_FLAT);
-    // glEnable(GL_LIGHT0);
-    // glEnable(GL_MULTISAMPLE);
 
     GLfloat lmodel_ambient[] = {1.0, 1.0, 1.0, 1.0};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
@@ -194,12 +192,8 @@ void GLWidget::initializeGL()
 void GLWidget::paintGL()
 {
     double t0 = std::tan(q0),
-           s0 = std::sin(q0), c0 = std::cos(q0),
            s0_2 = std::sin(q0/2.0), c0_2 = std::cos(q0/2.0),
-           s1 = std::sin(q1), c1 = std::cos(q1),
-           s1_2 = std::sin(q1/2.0), c1_2 = std::cos(q1/2.0),
-           s2 = std::sin(q2), c2 = std::cos(q2),
-           s2_2 = std::sin(q2/2.0), c2_2 = std::cos(q2/2.0);
+           c1 = std::cos(q1);
 
     GLfloat lw;
     glGetFloatv(GL_LINE_WIDTH, &lw);
@@ -229,16 +223,16 @@ void GLWidget::paintGL()
         glVertex3d(0.0, 0.0, 0.0);
         glVertex3d(0.0, 1.1*q4, 0.0);
         glVertex3d(0.0, 0.0, 0.0);
-        glVertex3d(0.0, 0.0, r);
+        glVertex3d(0.0, 0.0, 0.5*r);
     glEnd();
     glLineWidth(lw);
 
     // Labels for inertial axes
-    glRasterPos3d(1.2*q3, 0.0, 0.0);
+    glRasterPos3d(1.16*q3, 0.0, 0.0);
     printstring("$\\mathbf{n}_x$", 0.0);
     glRasterPos3d(0.0, 1.2*q4, 0.0);
     printstring("$\\mathbf{n}_y$", 0.0);
-    glRasterPos3d(0.0, 0.0, 1.2*r);
+    glRasterPos3d(0.0, 0.0, .6*r);
     printstring("$\\mathbf{n}_z$", 0.0);
 
     // Draw a circle with body fixed x and z axes in the plane of the circle,
@@ -246,7 +240,7 @@ void GLWidget::paintGL()
     glPushMatrix();
     glRasterPos3d(q3/2.0, q4+0.004, 0.0);
     printstring("$q_3$", 0.0);
-    glRasterPos3d(q3+0.004, q4/2.0, 0.0);
+    glRasterPos3d(q3+0.003, q4/2.0, 0.0);
     printstring("$q_4$", 0.0);
 
     // Line from contact point to x and y axes
@@ -256,21 +250,6 @@ void GLWidget::paintGL()
     glVertex3d(q3, q4, 0.0);
     glVertex3d(0.0, q4, 0.0);
     glEnd();
-
-    // Dimensioning lines along x and y axes
-//    glBegin(GL_LINES);
-//    glVertex3d(0.0, -0.02, 0.0);
-//    glVertex3d(0.8*q3/2.0, -0.02, 0.0);
-//    glVertex3d(1.2*q3/2.0, -0.02, 0.0);
-//    glVertex3d(q3, -0.02, 0.0);
-//    glEnd();
-//    glBegin(GL_LINES);
-//    glVertex3d(-0.02, 0.0, 0.0);
-//    glVertex3d(-0.02, 0.8*q4/2.0, 0.0);
-//    glVertex3d(-0.02, 1.2*q4/2.0, 0.0);
-//    glVertex3d(-0.02, q4, 0.0);
-//    glEnd();
-
 
     // Translate to disc contact point
     glTranslated(q3, q4, 0.0);
@@ -289,13 +268,13 @@ void GLWidget::paintGL()
       glPushMatrix();
         glTranslated(-d, 0.0, 0.0);
         glRotated(-RadToDeg(q0), 0.0, 0.0, 1.0);
-        glRasterPos3d(1.2*r*c0_2, 1.2*r*s0_2, 0.0);
+        glRasterPos3d(1.3*r*c0_2, 1.3*r*s0_2, 0.0);
         printstring("$q_0$", 0.0);
       glPopMatrix();
 
       glBegin(GL_LINES);
         // Line from contact point to x/y axes
-        glVertex3d(.1*r, 0.0, 0.0);
+        glVertex3d(.5*r, 0.0, 0.0);
         glVertex3d(-d, 0.0, 0.0);
         // Line from directly above contact point, even with disc center to
         // some height above disc
@@ -313,32 +292,31 @@ void GLWidget::paintGL()
     glRotated(RadToDeg(q1), 1.0, 0.0, 0.0);
     glTranslated(0.0, 0.0, -r);
 
-
+    // Draw dimensioning lines in disc plane
     glBegin(GL_LINES);
-  //    glVertex3d(0.0, 0.0, 0.0);
-  //    glVertex3d(0.0, 0.0, 1.9*r);
       glVertex3d(0.0, 0.0,  0.9*r);
       glVertex3d(0.0, 0.0, -0.9*r);
       glVertex3d(0.0, 0.0, -1.1*r);
       glVertex3d(0.0, 0.0, -1.75*r);
     glEnd();
 
+    // Draw the q2 label
     glPushMatrix();
-      glRotated(RadToDeg(q2)/2.0, 0.0, 1.0, 0.0);
-      glRasterPos3d(0.0, 0.0, .5*r);
+      glRotated(RadToDeg(2.0*M_PI + q2)/2.0 + 9.0, 0.0, 1.0, 0.0);
+      glRasterPos3d(0.0, 0.0, 0.5*r);
       printstring("$q_2$", 0.0);
     glPopMatrix();
+
+    // Rotate to draw the disc
     glRotated(RadToDeg(q2), 0.0, 1.0, 0.0);
 
-    // Disc fixed x and z axes
+    // Disc fixed -z axes
     glBegin(GL_LINES);
-//      glVertex3d(0.0, 0.0, 0.0);
-//      glVertex3d(r*.9, 0.0, 0.0);
       glVertex3d(0.0, 0.0, 0.0);
-      glVertex3d(0.0, 0.0, r*.9);
+      glVertex3d(0.0, 0.0, -r*.9);
     glEnd();
 
-    glLineWidth(2.0*lw);
+//    glLineWidth(2.0*lw);
     glPushMatrix();
       glRotated(-90.0, 1.0, 0.0, 0.0);
       GLUquadricObj *q = gluNewQuadric();
@@ -349,7 +327,7 @@ void GLWidget::paintGL()
       glMaterialfv(GL_FRONT, GL_AMBIENT, mat);
     glPopMatrix();
     DrawCircleXZ(r, 100);
-    glLineWidth(lw);
+//    glLineWidth(lw);
 
     glPopMatrix();
 }
